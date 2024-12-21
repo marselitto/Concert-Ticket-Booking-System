@@ -60,3 +60,29 @@ public class VIPConcert : Concert
         }
     }
 }
+
+public class OnlineConcert : Concert
+{
+    public string StreamingPlatform { get; private set; }
+
+    public OnlineConcert(string name, DateTime date, string streamingPlatform)
+        : base(name, date, "Online", int.MaxValue)
+    {
+        StreamingPlatform = streamingPlatform;
+    }
+
+    public override void BookSeat()
+    {
+        Console.WriteLine($"Access booked for {Name} on {StreamingPlatform}.");
+    }
+}
+
+public class PrivateConcert : Concert
+{
+    public PrivateConcert(string name, DateTime date, string location, int availableSeats) : base(name, date, location, availableSeats) { }
+
+    public override void BookSeat()
+    {
+        Console.WriteLine("Aby kupic bilet nalezy posiadac specjalne zaproszenie.");
+    }
+}
