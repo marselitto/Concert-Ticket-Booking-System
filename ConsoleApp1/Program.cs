@@ -100,3 +100,27 @@ public class Ticket
         SeatNumber = seatNumber;
     }
 }
+
+public class BookingSystem
+{
+    private List<IConcert> concerts = new List<IConcert>();
+
+    public void AddConcert(IConcert concert)
+    {
+        concerts.Add(concert);
+    }
+
+    public void BookTicket(IConcert concert)
+    {
+        concert.BookSeat();
+    }
+
+    public void DisplayConcerts(Func<IConcert, bool> filter)
+    {
+        var filteredConcerts = concerts.Where(filter);
+        foreach (var concert in filteredConcerts)
+        {
+            Console.WriteLine($"{concert.Name} - {concert.Date.ToShortDateString()} - {concert.Location} - Miejsca: {concert.AvailableSeats}");
+        }
+    }
+}
