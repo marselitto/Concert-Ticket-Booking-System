@@ -37,3 +37,26 @@ public class Concert : IConcert
         }
     }
 }
+
+public class RegularConcert : Concert
+{
+    public RegularConcert(string name, DateTime date, string location, int availableSeats) : base(name, date, location, availableSeats) { }
+}
+
+public class VIPConcert : Concert
+{
+    public VIPConcert(string name, DateTime date, string location, int availableSeats) : base(name, date, location, availableSeats) { }
+
+    public override void BookSeat()
+    {
+        if (AvailableSeats > 0)
+        {
+            AvailableSeats--;
+            Console.WriteLine($"Siedzenia VIP wykupione przez {Name}.");
+        }
+        else
+        {
+            Console.WriteLine("Brak miejsc VIP.");
+        }
+    }
+}
