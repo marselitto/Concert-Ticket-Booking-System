@@ -124,3 +124,22 @@ public class BookingSystem
         }
     }
 }
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        BookingSystem bookingSystem = new BookingSystem();
+        
+        bookingSystem.AddConcert(new RegularConcert("Guns N' Roses", DateTime.Now.AddDays(10), "Stadion Narodowy", 59000));
+        bookingSystem.AddConcert(new VIPConcert("Exclusive Jazz", DateTime.Now.AddDays(5), "Jazz Club", 20));
+        bookingSystem.AddConcert(new OnlineConcert("Live DJa", DateTime.Now.AddDays(2), "Tiktok"));
+        bookingSystem.AddConcert(new PrivateConcert("Wieczór akustyczny", DateTime.Now.AddDays(15), "nad jeziorem", 15));
+        
+        Console.WriteLine("Koncerty na Stadionie Narodowym:");
+        bookingSystem.DisplayConcerts(Concert => Concert.Location == "Stadion Narodowy");
+        
+        var concert = bookingSystem.DisplayConcerts(Concert => Concert.Name == "Guns N' Roses");
+        bookingSystem.BookTicket(concert);
+    }
+}
