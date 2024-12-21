@@ -86,3 +86,17 @@ public class PrivateConcert : Concert
         Console.WriteLine("Aby kupic bilet nalezy posiadac specjalne zaproszenie.");
     }
 }
+
+public class Ticket
+{
+    public IConcert Concert { get; private set; }
+    public decimal Price { get; private set; }
+    public int SeatNumber { get; private set; }
+
+    public Ticket(IConcert concert, decimal price, int seatNumber)
+    {
+        Concert = concert;
+        Price = price;
+        SeatNumber = seatNumber;
+    }
+}
