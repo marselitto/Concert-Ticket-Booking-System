@@ -1,20 +1,13 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
-public interface IConcert
+public class Concert
 {
-    string Name { get; }
-    DateTime Date { get; }
-    string Location { get; }
-    int AvailableSeats { get; }
-    void BookSeat();
-}
-
-public class Concert : IConcert
-{
-    public string Name { get; private set; }
-    public DateTime Date { get; private set; }
-    public string Location { get; private set; }
-    public int AvailableSeats { get; private set; }
+    public string Name { get; set; }
+    public DateTime Date { get; set; }
+    public string Location { get; set; }
+    public int AvailableSeats { get; set; }
 
     public Concert(string name, DateTime date, string location, int availableSeats)
     {
@@ -24,104 +17,73 @@ public class Concert : IConcert
         AvailableSeats = availableSeats;
     }
 
-    public virtual void BookSeat()
+    public bool BookSeat()
     {
         if (AvailableSeats > 0)
         {
             AvailableSeats--;
-            Console.WriteLine($"Miejsce wykupione przez {Name} na {Date.ToShortDateString()}.");
+            return true;
         }
-        else
-        {
-            Console.WriteLine("Brak wolnych miejsc.");
-        }
-    }
-}
-
-public class RegularConcert : Concert
-{
-    public RegularConcert(string name, DateTime date, string location, int availableSeats) : base(name, date, location, availableSeats) { }
-}
-
-public class VIPConcert : Concert
-{
-    public VIPConcert(string name, DateTime date, string location, int availableSeats) : base(name, date, location, availableSeats) { }
-
-    public override void BookSeat()
-    {
-        if (AvailableSeats > 0)
-        {
-            AvailableSeats--;
-            Console.WriteLine($"Siedzenia VIP wykupione przez {Name}.");
-        }
-        else
-        {
-            Console.WriteLine("Brak miejsc VIP.");
-        }
-    }
-}
-
-public class OnlineConcert : Concert
-{
-    public string StreamingPlatform { get; private set; }
-
-    public OnlineConcert(string name, DateTime date, string streamingPlatform)
-        : base(name, date, "Online", int.MaxValue)
-    {
-        StreamingPlatform = streamingPlatform;
-    }
-
-    public override void BookSeat()
-    {
-        Console.WriteLine($"Access booked for {Name} on {StreamingPlatform}.");
-    }
-}
-
-public class PrivateConcert : Concert
-{
-    public PrivateConcert(string name, DateTime date, string location, int availableSeats) : base(name, date, location, availableSeats) { }
-
-    public override void BookSeat()
-    {
-        Console.WriteLine("Aby kupic bilet nalezy posiadac specjalne zaproszenie.");
-    }
-}
-
-public class Ticket
-{
-    public IConcert Concert { get; private set; }
-    public decimal Price { get; private set; }
-    public int SeatNumber { get; private set; }
-
-    public Ticket(IConcert concert, decimal price, int seatNumber)
-    {
-        Concert = concert;
-        Price = price;
-        SeatNumber = seatNumber;
+        return false;
     }
 }
 
 public class BookingSystem
 {
-    private List<IConcert> concerts = new List<IConcert>();
+    private List<Concert> concerts = new List<Concert>();
 
-    public void AddConcert(IConcert concert)
+    public void AddConcert(Concert concert)
     {
         concerts.Add(concert);
     }
 
-    public void BookTicket(IConcert concert)
+    public void ReserveTicket(string concertName)
     {
-        concert.BookSeat();
+        var concert = concerts.FirstOrDefault(c => c.Name == concertName);
+        if (concert != null)
+        {
+            if (concert.BookSeat())
+            {
+                Console.WriteLine($"Bilet na koncert '{concert.Name}' został zarezerwowany. Pozostało {concert.AvailableSeats} miejsc.");
+            }
+            else
+            {
+                Console.WriteLine($"Brak dostępnych miejsc na koncert '{concert.Name}'.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Nie znaleziono koncertu o podanej nazwie.");
+        }
     }
 
-    public void DisplayConcerts(Func<IConcert, bool> filter)
+    public void ShowConcerts()
     {
-        var filteredConcerts = concerts.Where(filter);
-        foreach (var concert in filteredConcerts)
+        Console.WriteLine("Dostępne koncerty:");
+        foreach (var concert in concerts)
         {
-            Console.WriteLine($"{concert.Name} - {concert.Date.ToShortDateString()} - {concert.Location} - Miejsca: {concert.AvailableSeats}");
+            Console.WriteLine($"Nazwa: {concert.Name}, Data: {concert.Date.ToShortDateString()}, Lokalizacja: {concert.Location}, Dostępne miejsca: {concert.AvailableSeats}");
         }
+    }
+
+    public void AddConcertManually()
+    {
+        Console.WriteLine("\nDodawanie nowego koncertu:");
+
+        Console.Write("Podaj nazwę koncertu: ");
+        string name = Console.ReadLine();
+
+        Console.Write("Podaj datę koncertu (format: dd-mm-yyyy): ");
+        DateTime date = DateTime.Parse(Console.ReadLine());
+
+        Console.Write("Podaj lokalizację koncertu: ");
+        string location = Console.ReadLine();
+
+        Console.Write("Podaj liczbę dostępnych miejsc: ");
+        int availableSeats = int.Parse(Console.ReadLine());
+
+        AddConcert(new Concert(name, date, location, availableSeats));
+        Console.WriteLine("Nowy koncert został dodany.");
     }
 }
 
@@ -130,16 +92,50 @@ class Program
     static void Main(string[] args)
     {
         BookingSystem bookingSystem = new BookingSystem();
-        
-        bookingSystem.AddConcert(new RegularConcert("Guns N' Roses", DateTime.Now.AddDays(10), "Stadion Narodowy", 59000));
-        bookingSystem.AddConcert(new VIPConcert("Exclusive Jazz", DateTime.Now.AddDays(5), "Jazz Club", 20));
-        bookingSystem.AddConcert(new OnlineConcert("Live DJa", DateTime.Now.AddDays(2), "Tiktok"));
-        bookingSystem.AddConcert(new PrivateConcert("Wieczór akustyczny", DateTime.Now.AddDays(15), "nad jeziorem", 15));
-        
-        Console.WriteLine("Koncerty na Stadionie Narodowym:");
-        bookingSystem.DisplayConcerts(Concert => Concert.Location == "Stadion Narodowy");
-        
-        var concert = bookingSystem.DisplayConcerts(Concert => Concert.Name == "Guns N' Roses");
-        bookingSystem.BookTicket(concert);
+
+        bookingSystem.AddConcert(new Concert("Koncert Rockowy", DateTime.Parse("2024-12-25"), "Warszawa", 50));
+        bookingSystem.AddConcert(new Concert("Koncert Jazzowy", DateTime.Parse("2024-12-30"), "Kraków", 30));
+
+        bool running = true;
+        while (running)
+        {
+            Console.Clear();
+            bookingSystem.ShowConcerts(); 
+
+            Console.WriteLine("\nWybierz opcję:");
+            Console.WriteLine("1 - Dodaj nowy koncert");
+            Console.WriteLine("2 - Zarezerwuj bilet");
+            Console.WriteLine("3 - Wyświetl dostępne koncerty");
+            Console.WriteLine("4 - Zakończ");
+            Console.Write("Wybór: ");
+            string choice = Console.ReadLine();
+
+            switch (choice)
+            {
+                case "1":
+                    bookingSystem.AddConcertManually();
+                    break;
+                case "2":
+                    Console.WriteLine("\nRezerwacja biletu na koncert:");
+                    bookingSystem.ShowConcerts();
+                    Console.Write("Podaj nazwę koncertu, na który chcesz zarezerwować bilet: ");
+                    string concertName = Console.ReadLine();
+                    bookingSystem.ReserveTicket(concertName);
+                    break;
+                case "3":
+                    bookingSystem.ShowConcerts();
+                    break;
+                case "4":
+                    running = false;
+                    Console.WriteLine("Zakończono program.");
+                    break;
+                default:
+                    Console.WriteLine("Nieprawidłowy wybór. Spróbuj ponownie.");
+                    break;
+            }
+
+            Console.WriteLine("\nNaciśnij dowolny klawisz, aby kontynuować...");
+            Console.ReadKey();
+        }
     }
 }
